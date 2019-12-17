@@ -1,14 +1,29 @@
-name := """todolistkhv"""
-organization := "com.kinoplanrecruite"
+import sbt.Keys.scalacOptions
 
-version := "1.0-SNAPSHOT"
+lazy val root = (project in file("."))
+  .enablePlugins(PlayScala)
+  .settings(
+    name := """todolistkhv""",
+    organization := "com.kinoplanrecruite",
+    version := "0.01-SNAPSHOT",
+    scalaVersion := "2.13.1",
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+    libraryDependencies ++= Seq(
+      guice,
+      "com.typesafe.play" %% "play-slick" % "5.0.0",
+      //"com.typesafe.play" %% "play-slick-evolutions" % "5.0.0",
+      "mysql" % "mysql-connector-java" % "8.0.13",
+      "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
+    ),
 
-scalaVersion := "2.13.1"
+    scalacOptions ++= Seq(
+      "-feature",
+      "-deprecation",
+      "-Xfatal-warnings"
+    )
+  )
 
-libraryDependencies += guice
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
+
 
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.kinoplanrecruite.controllers._"

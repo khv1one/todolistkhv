@@ -1,6 +1,7 @@
 logs
 /target
-/project
+/project/project
+/project/target
 /.idea
 /.g8
 /.idea_modules
