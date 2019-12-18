@@ -1,5 +1,7 @@
 package models
 
-class User {
-
-}
+case class User (
+  id: Long,
+  username: String,
+  password: String
+)
