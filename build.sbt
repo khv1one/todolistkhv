@@ -13,7 +13,9 @@ lazy val root = (project in file("."))
       "com.typesafe.play" %% "play-slick" % "5.0.0",
       //"com.typesafe.play" %% "play-slick-evolutions" % "5.0.0",
       "mysql" % "mysql-connector-java" % "8.0.13",
+      "com.typesafe.play" %% "play-json" % "2.8.1",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
+
     ),
 
     scalacOptions ++= Seq(

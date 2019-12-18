@@ -14,12 +14,16 @@ class UserRepo @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec:
   import dbConfig._
   import profile.api._
 
-  class UserTable(tag: Tag) extends Table[User](tag, "users") {
+  private class UserTable(tag: Tag) extends Table[User](tag, "users") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def username = column[String]("username")
     def password = column[String]("passwd")
-    def * = (id, username, password) <> (User.tupled, User.unapply)
+    def * = (id, username, password) <> ((User.apply _).tupled, User.unapply)
   }
 
-  val users = TableQuery[UserTable]
+  private val users = TableQuery[UserTable]
+
+  def addUser(user: User) = db.run {
+    users += user
+  }
 }

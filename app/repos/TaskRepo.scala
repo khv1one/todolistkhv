@@ -9,8 +9,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 
 @Singleton
-class TaskRepo @Inject() (dbConfigProvider: DatabaseConfigProvider,
-                          userRepo: UserRepo)
+class TaskRepo @Inject() (dbConfigProvider: DatabaseConfigProvider)
                           (implicit ec: ExecutionContext) {
 
   protected val dbConfig = dbConfigProvider.get[JdbcProfile]
@@ -25,9 +24,10 @@ class TaskRepo @Inject() (dbConfigProvider: DatabaseConfigProvider,
     def deleted = column[Boolean]("deleted")
     def * = (id, userId, text, done, deleted) <> ((Task.apply _).tupled, Task.unapply)
 
-    def user = foreignKey("user_fk", userId, userRepo.users)(_.id)
+    //def user = foreignKey("user_fk", userId, userRepo)(_.id)
   }
 
-  val tasks = TableQuery[TaskTable]
-  
+  private val tasks = TableQuery[TaskTable]
+
+
 }
