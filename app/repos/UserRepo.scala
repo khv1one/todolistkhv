@@ -2,6 +2,7 @@ package repos
 
 import javax.inject.{Inject, Singleton}
 
+import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
 
 import models.User
@@ -16,12 +17,12 @@ class UserRepo @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec:
 
   private class UserTable(tag: Tag) extends Table[User](tag, "users") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def username = column[String]("username")
-    def password = column[String]("passwd")
+    def username = column[String]("username", O.Unique)
+    def password = column[String]("password")
     def * = (id, username, password) <> ((User.apply _).tupled, User.unapply)
   }
 
-  private val users = TableQuery[UserTable]
+  private lazy val users = TableQuery[UserTable]
 
   def addUser(user: User) = db.run {
     users += user

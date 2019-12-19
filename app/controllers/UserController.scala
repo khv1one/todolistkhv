@@ -16,11 +16,17 @@ class UserController @Inject() (userRepo: UserRepo,
 
 
   def addUser = Action(parse.tolerantJson) { implicit request =>
-    request.body.validate[User].fold(
-      error => BadRequest(Json.obj("status" -> "KO", "message" -> JsError.toJson(error))),
-      user => {
-        userRepo.addUser(user)
-        Ok(Json.obj("status" -> "OK", "message" -> ("User '" + user.username + "' saved.")))
+
+    val user = request.body.validate[User]
+      user.fold (
+        error =>
+          BadRequest(Json.obj("status" -> "Invalid user json structure", "message" -> JsError.toJson(error))),
+        usr => {
+          val res = userRepo.addUser(usr)
+          Ok(Json.obj("status" -> "OK", "message" -> ("User '" + usr.username + "' saved.")))
       })
   }
+
+
+
 }
