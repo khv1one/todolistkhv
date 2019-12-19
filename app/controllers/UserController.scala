@@ -5,7 +5,7 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 import models.User
-import play.api.libs.json.{JsError, Json, Reads}
+import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, MessagesControllerComponents}
 import repos.UserRepo
 
@@ -15,18 +15,20 @@ class UserController @Inject() (userRepo: UserRepo,
   extends AbstractController(cc) {
 
 
-  def addUser = Action(parse.tolerantJson) { implicit request =>
-
-    val user = request.body.validate[User]
-      user.fold (
-        error =>
-          BadRequest(Json.obj("status" -> "Invalid user json structure", "message" -> JsError.toJson(error))),
-        usr => {
-          val res = userRepo.addUser(usr)
-          Ok(Json.obj("status" -> "OK", "message" -> ("User '" + usr.username + "' saved.")))
-      })
+  def addUser = Action.async(parse.json[User]) { implicit request =>
+    val user = request.body
+    userRepo.add(user)
+      .map { _ =>
+        Ok(Json.obj("status" -> "OK", "message" -> ("User '" + user.username + "' saved.")))
+      }
+      .recover { case _ =>
+        ServiceUnavailable
+      }
   }
 
-
-
+  def getAllUsers = Action.async { implicit request =>
+    userRepo.users.map { users =>
+      Ok(Json.toJson(users))
+    }
+  }
 }
