@@ -7,9 +7,9 @@ case class Task (
   userId: Long,
   text: String,
   done: Boolean,
-  delete: Boolean
+  deleted: Boolean
 )
 
-//object Task {
-//  implicit val TaskFormat: OFormat[Task] = Json.format[Task]
-//}
+object Task {
+  implicit val TaskFormat: OFormat[Task] = Json.format[Task]
+}
