@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
 
+import cats.data.OptionT
 import models.User
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
@@ -26,11 +27,16 @@ class UserRepo @Inject() (protected val dbConfigProvider: DatabaseConfigProvider
 
   def add(user: User) = db.run( usersTable += user )
 
-  def users: Future[Seq[User]] = db.run( usersTable.result )
+  def users: Future[Seq[User]] = db.run(
+    usersTable.result
+  )
 
-  def userById(id: Long): Future[Option[User]] = db.run( usersTable.filter(_.id === id).result.headOption )
 
-  def userByName(username: String): Future[Option[User]] = db.run {
+  def userById(id: Long): OptionT[Future, User] = OptionT( db.run {
+    usersTable.filter(_.id === id).result.headOption
+  })
+
+  def userByName(username: String): OptionT[Future, User] = OptionT( db.run {
     usersTable.filter(_.username === username).result.headOption
-  }
+  })
 }

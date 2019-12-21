@@ -4,11 +4,13 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
 
 import akka.actor.Status.Success
+import cats.data.{EitherT, Nested, OptionT}
 import com.google.inject.Inject
-import models.Task
+import models.{Task, User}
 import play.api.libs.json.Json
-import play.api.mvc.{AbstractController, Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{AbstractController, Action, AnyContent, MessagesControllerComponents, Result}
 import repos.{TaskRepo, UserRepo}
+import cats.instances.future._
 
 class TaskController @Inject() (
   taskRepo: TaskRepo,
@@ -25,30 +27,26 @@ class TaskController @Inject() (
     }
   }
 
-  def getTasks = Action.async { implicit request =>
+  def tasks = Action.async { implicit request =>
     taskRepo.tasks.map { tasks =>
       Ok(Json.toJson(tasks))
     }
   }
 
-  def getTasksByUserId(id: Long) = Action.async { implicit request =>
+  def tasksByUserId(id: Long) = Action.async { implicit request =>
     taskRepo.tasksByUserId(id).map { tasks =>
       Ok(Json.toJson(tasks))
     }
   }
 
-  def getTasksByUserName(name: String): Action[AnyContent] = Action.async { implicit request =>
-    userRepo.userByName(name).flatMap {
-      case Some(u) =>
-        taskRepo.tasksByUserId(u.id).map { tasks =>
-          Ok(Json.toJson(tasks))
-        }.recover { case _ =>
-          ServiceUnavailable
-        }
-      case None => Future(ServiceUnavailable)
-    }.recover { case _ =>
-      ServiceUnavailable
-    }
-  }
+  def tasksByUserName(name: String): Action[AnyContent] = Action.async { implicit request =>
+    val tasks = for {
+      user <- userRepo.userByName(name)
+      tasks <- OptionT.liftF(taskRepo.tasksByUserId(user.id))
+    } yield tasks
 
+    tasks
+      .map( tasks => Ok(Json.toJson(tasks)) )
+      .getOrElse(ServiceUnavailable)
+  }
 }

@@ -6,13 +6,16 @@
 # An example controller showing a sample home page
 GET     /                                           controllers.HomeController.index
 
-GET     /todolist/api/users                         controllers.UserController.getUsers
+GET     /todolist/api/users                         controllers.UserController.users
 POST    /todolist/api/users/addUser                 controllers.UserController.addUser
+GET     /todolist/api/users/:id                     controllers.UserController.userById(id: Long)
+GET     /todolist/api/users/name/:name              controllers.UserController.userByName(name: String)
 
-GET     /todolist/api/tasks                         controllers.TaskController.getTasks
+
+GET     /todolist/api/tasks                         controllers.TaskController.tasks
 POST    /todolist/api/tasks/addTask                 controllers.TaskController.addTask
-GET     /todolist/api/tasks/user/:id                controllers.TaskController.getTasksByUserId(id: Long)
-GET     /todolist/api/tasks/user/name/:name         controllers.TaskController.getTasksByUserName(name: String)
+GET     /todolist/api/tasks/user/:id                controllers.TaskController.tasksByUserId(id: Long)
+GET     /todolist/api/tasks/user/name/:name         controllers.TaskController.tasksByUserName(name: String)
 
 
 # Map static resources from the /public folder to the /assets URL path
