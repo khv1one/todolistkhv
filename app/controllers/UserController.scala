@@ -8,12 +8,14 @@ import models.User
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, MessagesControllerComponents}
 import repos.UserRepo
+import actions.SecuredAction
 
 import cats.data._
 import cats.instances.future._
 
 class UserController @Inject() (
   userRepo: UserRepo,
+  securedAction: SecuredAction,
   cc: MessagesControllerComponents,
   ) (implicit ec: ExecutionContext
   ) extends AbstractController(cc) {
@@ -25,7 +27,7 @@ class UserController @Inject() (
       .recover { case _ => BadRequest }
   }
 
-  def users = Action.async { implicit request =>
+  def users = securedAction.async { implicit request =>
     userRepo.users.map( users => Ok(Json.toJson(users)) )
   }
 

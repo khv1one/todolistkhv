@@ -11,10 +11,12 @@ import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, MessagesControllerComponents, Result}
 import repos.{TaskRepo, UserRepo}
 import cats.instances.future._
+import actions.SecuredAction
 
 class TaskController @Inject() (
   taskRepo: TaskRepo,
   userRepo: UserRepo,
+  securedAction: SecuredAction,
   cc: MessagesControllerComponents
   ) (implicit ex: ExecutionContext
   ) extends AbstractController (cc) {
@@ -25,7 +27,7 @@ class TaskController @Inject() (
       .recover { case _ => BadRequest }
   }
 
-  def tasks = Action.async { implicit request =>
+  def tasks = securedAction.async { implicit request =>
     taskRepo.tasks.map( tasks => Ok(Json.toJson(tasks)) )
   }
 
