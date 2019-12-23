@@ -21,7 +21,7 @@ class TaskController @Inject() (
   ) (implicit ex: ExecutionContext
   ) extends AbstractController (cc) {
 
-  def addTask = Action.async(parse.json[Task]) { implicit request =>
+  def addTask = securedAction.async(parse.json[Task]) { implicit request =>
     taskRepo.add(request.body)
       .map ( _ => Created )
       .recover { case _ => BadRequest }
@@ -31,17 +31,17 @@ class TaskController @Inject() (
     taskRepo.tasks.map( tasks => Ok(Json.toJson(tasks)) )
   }
 
-  def taskById(id: Long) = Action.async { implicit request =>
+  def taskById(id: Long) = securedAction.async { implicit request =>
     taskRepo.taskById(id)
       .map( task => Ok(Json.toJson(task)) )
       .getOrElse(NotFound)
   }
 
-  def tasksByUserId(id: Long) = Action.async { implicit request =>
+  def tasksByUserId(id: Long) = securedAction.async { implicit request =>
     taskRepo.tasksByUserId(id).map( tasks => Ok(Json.toJson(tasks)) )
   }
 
-  def tasksByUserName(name: String) = Action.async { implicit request =>
+  def tasksByUserName(name: String) = securedAction.async { implicit request =>
     val tasks = for {
       user <- userRepo.userByName(name)
       tasks <- OptionT.liftF(taskRepo.tasksByUserId(user.id))
@@ -50,13 +50,13 @@ class TaskController @Inject() (
     tasks.getOrElse(NotFound)
   }
 
-  def update = Action.async(parse.json[Task]) { implicit request =>
+  def update = securedAction.async(parse.json[Task]) { implicit request =>
     taskRepo.update(request.body)
       .map( result => if (result != 0) Ok else NotFound )
       .recover{ case _ => ServiceUnavailable  }
   }
 
-  def delete(id: Long) = Action.async { implicit request =>
+  def delete(id: Long) = securedAction.async { implicit request =>
     taskRepo.delete(id)
       .map( result => if (result != 0) Ok else NotFound)
       .recover{ case _ => ServiceUnavailable}

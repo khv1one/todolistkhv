@@ -31,25 +31,25 @@ class UserController @Inject() (
     userRepo.users.map( users => Ok(Json.toJson(users)) )
   }
 
-  def userById(id: Long) = Action.async { implicit request =>
+  def userById(id: Long) = securedAction.async { implicit request =>
     userRepo.userById(id)
       .map( user => Ok(Json.toJson(user)) )
       .getOrElse(NotFound)
   }
 
-  def userByName(name: String) = Action.async { implicit request =>
+  def userByName(name: String) = securedAction.async { implicit request =>
     userRepo.userByName(name)
       .map( user => Ok(Json.toJson(user)) )
       .getOrElse(NotFound)
   }
 
-  def update = Action.async(parse.json[User]) { implicit request =>
+  def update = securedAction.async(parse.json[User]) { implicit request =>
     userRepo.update(request.body)
       .map( result => if (result != 0) Ok else NotFound )
       .recover{ case _ => ServiceUnavailable  }
   }
 
-  def delete(id: Long) = Action.async { implicit request =>
+  def delete(id: Long) = securedAction.async { implicit request =>
     userRepo.delete(id)
       .map( result => if (result != 0) Ok else NotFound)
       .recover{ case _ => ServiceUnavailable}
