@@ -39,4 +39,12 @@ class UserRepo @Inject() (protected val dbConfigProvider: DatabaseConfigProvider
   def userByName(username: String): OptionT[Future, User] = OptionT( db.run {
     usersTable.filter(_.username === username).result.headOption
   })
+
+  def update(user: User) = db.run {
+    usersTable.filter(_.id === user.id).update(user)
+  }
+
+  def delete(id: Long) = db.run {
+    usersTable.filter(_.id === id).delete
+  }
 }

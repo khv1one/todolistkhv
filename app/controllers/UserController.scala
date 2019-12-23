@@ -20,31 +20,37 @@ class UserController @Inject() (
 
 
   def addUser = Action.async(parse.json[User]) { implicit request =>
-    val user = request.body
-    userRepo.add(user)
-      .map { _ =>
-        Ok(Json.obj("status" -> "OK", "message" -> (s"User '${user.username}' saved.")))
-      }
-      .recover { case _ =>
-        ServiceUnavailable
-      }
+    userRepo.add(request.body)
+      .map( _ => Created )
+      .recover { case _ => BadRequest }
   }
 
   def users = Action.async { implicit request =>
-    userRepo.users.map { users =>
-      Ok(Json.toJson(users))
-    }
+    userRepo.users.map( users => Ok(Json.toJson(users)) )
   }
 
   def userById(id: Long) = Action.async { implicit request =>
     userRepo.userById(id)
       .map( user => Ok(Json.toJson(user)) )
-      .getOrElse(ServiceUnavailable)
+      .getOrElse(NotFound)
   }
 
   def userByName(name: String) = Action.async { implicit request =>
     userRepo.userByName(name)
       .map( user => Ok(Json.toJson(user)) )
-      .getOrElse(ServiceUnavailable)
+      .getOrElse(NotFound)
   }
+
+  def update = Action.async(parse.json[User]) { implicit request =>
+    userRepo.update(request.body)
+      .map( result => if (result != 0) Ok else NotFound )
+      .recover{ case _ => ServiceUnavailable  }
+  }
+
+  def delete(id: Long) = Action.async { implicit request =>
+    userRepo.delete(id)
+      .map( result => if (result != 0) Ok else NotFound)
+      .recover{ case _ => ServiceUnavailable}
+  }
+
 }

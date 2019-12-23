@@ -20,33 +20,44 @@ class TaskController @Inject() (
   ) extends AbstractController (cc) {
 
   def addTask = Action.async(parse.json[Task]) { implicit request =>
-    taskRepo.add(request.body).map { _ =>
-      Ok(Json.obj("status" -> "OK", "message" -> "Task saved."))
-    }.recover { case _ =>
-      ServiceUnavailable
-    }
+    taskRepo.add(request.body)
+      .map ( _ => Created )
+      .recover { case _ => BadRequest }
   }
 
   def tasks = Action.async { implicit request =>
-    taskRepo.tasks.map { tasks =>
-      Ok(Json.toJson(tasks))
-    }
+    taskRepo.tasks.map( tasks => Ok(Json.toJson(tasks)) )
+  }
+
+  def taskById(id: Long) = Action.async { implicit request =>
+    taskRepo.taskById(id)
+      .map( task => Ok(Json.toJson(task)) )
+      .getOrElse(NotFound)
   }
 
   def tasksByUserId(id: Long) = Action.async { implicit request =>
-    taskRepo.tasksByUserId(id).map { tasks =>
-      Ok(Json.toJson(tasks))
-    }
+    taskRepo.tasksByUserId(id).map( tasks => Ok(Json.toJson(tasks)) )
   }
 
-  def tasksByUserName(name: String): Action[AnyContent] = Action.async { implicit request =>
+  def tasksByUserName(name: String) = Action.async { implicit request =>
     val tasks = for {
       user <- userRepo.userByName(name)
       tasks <- OptionT.liftF(taskRepo.tasksByUserId(user.id))
-    } yield tasks
+    } yield Ok(Json.toJson(tasks))
 
-    tasks
-      .map( tasks => Ok(Json.toJson(tasks)) )
-      .getOrElse(ServiceUnavailable)
+    tasks.getOrElse(NotFound)
   }
+
+  def update = Action.async(parse.json[Task]) { implicit request =>
+    taskRepo.update(request.body)
+      .map( result => if (result != 0) Ok else NotFound )
+      .recover{ case _ => ServiceUnavailable  }
+  }
+
+  def delete(id: Long) = Action.async { implicit request =>
+    taskRepo.delete(id)
+      .map( result => if (result != 0) Ok else NotFound)
+      .recover{ case _ => ServiceUnavailable}
+  }
+
 }

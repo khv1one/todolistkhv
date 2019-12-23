@@ -30,8 +30,20 @@ class TaskRepo @Inject() (protected val dbConfigProvider: DatabaseConfigProvider
 
   def tasks: Future[Seq[Task]] = db.run (tasksTable.result)
 
+  def taskById(id: Long): OptionT[Future, Task] = OptionT(db.run {
+    tasksTable.filter(_.id === id).result.headOption
+  })
+
   def tasksByUserId(userId: Long): Future[Seq[Task]] = db.run {
     tasksTable.filter(_.userId === userId).result
+  }
+
+  def update(task: Task) = db.run {
+    tasksTable.filter(_.id === task.id).update(task)
+  }
+
+  def delete(id: Long) = db.run {
+    tasksTable.filter(_.id === id).delete
   }
 
 }
