@@ -8,3 +8,4 @@ logs
 /.classpath
 /.settings
 /RUNNING_PID
+.DS_Store

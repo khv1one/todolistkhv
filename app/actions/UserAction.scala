@@ -15,7 +15,7 @@ case class UserRequest[A](user: User, request: Request[A])
   extends WrappedRequest[A](request)
 
 @Singleton
-class SecuredAction @Inject() (
+class UserAction @Inject() (
   parser: BodyParsers.Default,
   userRepo: UserRepo,
   )(implicit ex: ExecutionContext
@@ -27,9 +27,7 @@ class SecuredAction @Inject() (
   ): Future[Result] = {
 
     val user = request.session.get(GlobalKeys.SESSION_USER_ID_KEY) match {
-      case Some(value) => {
-        userRepo.userById(value.toLong)
-      }
+      case Some(value) => userRepo.userByName(value)
       case _ => OptionT[Future, User](Future(None))
     }
 

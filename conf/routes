@@ -6,6 +6,7 @@
 # An example controller showing a sample home page
 
 GET     /todolist/api/users                         controllers.UserController.users
+GET     /todolist/api/users/me                      controllers.UserController.me
 POST    /todolist/api/users/add                     controllers.UserController.addUser
 GET     /todolist/api/users/:id                     controllers.UserController.userById(id: Long)
 GET     /todolist/api/users/name/:name              controllers.UserController.userByName(name: String)
@@ -15,6 +16,7 @@ POST    /todolist/api/users/login                   controllers.AuthenticationCo
 POST    /todolist/api/users/logout                  controllers.AuthenticationController.logout
 
 GET     /todolist/api/tasks                         controllers.TaskController.tasks
+GET     /todolist/api/tasks/all                     controllers.TaskController.allTasks
 POST    /todolist/api/tasks/add                     controllers.TaskController.addTask
 GET     /todolist/api/tasks/:id                     controllers.TaskController.taskById(id: Long)
 GET     /todolist/api/tasks/user/:id                controllers.TaskController.tasksByUserId(id: Long)

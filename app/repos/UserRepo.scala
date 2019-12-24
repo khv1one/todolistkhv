@@ -40,14 +40,6 @@ class UserRepo @Inject() (protected val dbConfigProvider: DatabaseConfigProvider
     usersTable.filter(_.username === username).result.headOption
   })
 
-  def userByIdAndName(id: Long, username: String): OptionT[Future, User] = OptionT( db.run {
-    usersTable
-      .filter(user =>
-        user.username === username &&
-        user.id === id)
-      .result.headOption
-  })
-
   def userByNameAndPassword(
     username: String,
     password: String

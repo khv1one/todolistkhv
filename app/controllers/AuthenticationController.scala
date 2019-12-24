@@ -11,13 +11,13 @@ import play.api.mvc.{AbstractController, Cookie, DiscardingCookie, MessagesContr
 import repos.UserRepo
 import utils.GlobalKeys
 import cats.instances.future._
-import actions.SecuredAction
+import actions.UserAction
 import play.filters.csrf.{CSRF, CSRFAddToken}
 
 @Singleton
 class AuthenticationController @Inject() (
   userRepo: UserRepo,
-  securedAction: SecuredAction,
+  userAction: UserAction,
   addToken: CSRFAddToken,
   cc: MessagesControllerComponents,
   )(implicit ec: ExecutionContext
@@ -27,11 +27,11 @@ class AuthenticationController @Inject() (
     val logUser = request.body
     userRepo.userByNameAndPassword(logUser.username, logUser.password)
       .map { user =>
-        Ok.withSession(GlobalKeys.SESSION_USER_ID_KEY -> user.id.toString)
+        Ok.withSession(GlobalKeys.SESSION_USER_ID_KEY -> user.username)
       }.getOrElse(NotFound)
   })
 
-  def logout = securedAction.async {  implicit request =>
+  def logout = userAction.async {  implicit request =>
     Future(Ok.withNewSession)
   }
 
