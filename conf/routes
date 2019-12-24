@@ -11,6 +11,8 @@ GET     /todolist/api/users/:id                     controllers.UserController.u
 GET     /todolist/api/users/name/:name              controllers.UserController.userByName(name: String)
 PUT     /todolist/api/users/update                  controllers.UserController.update
 DELETE  /todolist/api/users/:id/delete              controllers.UserController.delete(id: Long)
+POST    /todolist/api/users/login                   controllers.AuthenticationController.login
+POST    /todolist/api/users/logout                  controllers.AuthenticationController.logout
 
 GET     /todolist/api/tasks                         controllers.TaskController.tasks
 POST    /todolist/api/tasks/add                     controllers.TaskController.addTask
@@ -19,6 +21,7 @@ GET     /todolist/api/tasks/user/:id                controllers.TaskController.t
 GET     /todolist/api/tasks/user/name/:name         controllers.TaskController.tasksByUserName(name: String)
 PUT     /todolist/api/tasks/update                  controllers.TaskController.update
 DELETE  /todolist/api/tasks/:id/delete              controllers.TaskController.delete(id: Long)
+
 
 # Map static resources from the /public folder to the /assets URL path
 #GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

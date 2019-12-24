@@ -2,16 +2,14 @@ package controllers
 
 import javax.inject.Inject
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
+import cats.instances.future._
+import actions.SecuredAction
 import models.User
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, MessagesControllerComponents}
 import repos.UserRepo
-import actions.SecuredAction
-
-import cats.data._
-import cats.instances.future._
 
 class UserController @Inject() (
   userRepo: UserRepo,
