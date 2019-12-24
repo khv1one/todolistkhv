@@ -27,7 +27,9 @@ class SecuredAction @Inject() (
   ): Future[Result] = {
 
     val user = request.session.get(GlobalKeys.SESSION_USER_ID_KEY) match {
-      case Some(value) => userRepo.userById(value.toLong)
+      case Some(value) => {
+        userRepo.userById(value.toLong)
+      }
       case _ => OptionT[Future, User](Future(None))
     }
 

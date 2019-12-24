@@ -11,12 +11,13 @@ import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, MessagesControllerComponents, Result}
 import repos.{TaskRepo, UserRepo}
 import cats.instances.future._
-import actions.SecuredAction
+import actions.{AdminAction, SecuredAction}
 
 class TaskController @Inject() (
   taskRepo: TaskRepo,
   userRepo: UserRepo,
   securedAction: SecuredAction,
+  adminAction: AdminAction,
   cc: MessagesControllerComponents
 ) (implicit ex: ExecutionContext
 ) extends AbstractController (cc) {
@@ -27,27 +28,27 @@ class TaskController @Inject() (
       .recover { case _ => BadRequest }
   }
 
-  def tasks = securedAction.async { implicit request =>
+  def tasks = adminAction.async { implicit request =>
     taskRepo.tasks.map( tasks => Ok(Json.toJson(tasks)) )
   }
 
-  def taskById(id: Long) = securedAction.async { implicit request =>
-    taskRepo.taskById(id)
-      .map( task => Ok(Json.toJson(task)) )
-      .getOrElse(NotFound)
-  }
-
-  def tasksByUserId(id: Long) = securedAction.async { implicit request =>
+  def tasksByUserId(id: Long) = adminAction.async { implicit request =>
     taskRepo.tasksByUserId(id).map( tasks => Ok(Json.toJson(tasks)) )
   }
 
-  def tasksByUserName(name: String) = securedAction.async { implicit request =>
+  def tasksByUserName(name: String) = adminAction.async { implicit request =>
     val tasks = for {
       user <- userRepo.userByName(name)
       tasks <- OptionT.liftF(taskRepo.tasksByUserId(user.id))
     } yield Ok(Json.toJson(tasks))
 
     tasks.getOrElse(NotFound)
+  }
+
+  def taskById(id: Long) = securedAction.async { implicit request =>
+    taskRepo.taskById(id)
+      .map( task => Ok(Json.toJson(task)) )
+      .getOrElse(NotFound)
   }
 
   def update = securedAction.async(parse.json[Task]) { implicit request =>
