@@ -15,9 +15,8 @@ class UserController @Inject() (
   userRepo: UserRepo,
   securedAction: SecuredAction,
   cc: MessagesControllerComponents,
-  ) (implicit ec: ExecutionContext
-  ) extends AbstractController(cc) {
-
+) (implicit ec: ExecutionContext
+) extends AbstractController(cc) {
 
   def addUser = Action.async(parse.json[User]) { implicit request =>
     userRepo.add(request.body)

@@ -18,8 +18,8 @@ class TaskController @Inject() (
   userRepo: UserRepo,
   securedAction: SecuredAction,
   cc: MessagesControllerComponents
-  ) (implicit ex: ExecutionContext
-  ) extends AbstractController (cc) {
+) (implicit ex: ExecutionContext
+) extends AbstractController (cc) {
 
   def addTask = securedAction.async(parse.json[Task]) { implicit request =>
     taskRepo.add(request.body)
