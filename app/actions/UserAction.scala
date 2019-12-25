@@ -18,7 +18,7 @@ case class UserRequest[A](user: User, request: Request[A])
 class UserAction @Inject() (
   parser: BodyParsers.Default,
   userRepo: UserRepo,
-  )(implicit ex: ExecutionContext
+  )(implicit ec: ExecutionContext
   ) extends ActionBuilder[UserRequest, AnyContent] {
 
   override def invokeBlock[A](
@@ -38,5 +38,5 @@ class UserAction @Inject() (
   }
 
   override def parser: BodyParser[AnyContent] = parser
-  override protected def executionContext: ExecutionContext = ex
+  override protected def executionContext: ExecutionContext = ec
 }

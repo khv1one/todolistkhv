@@ -15,8 +15,8 @@ import utils.GlobalKeys
 class AdminAction @Inject() (
   parser: BodyParsers.Default,
   userRepo: UserRepo
-)(implicit ec: ExecutionContext
-) extends ActionBuilderImpl(parser) {
+)(implicit ec: ExecutionContext,
+) extends ActionBuilder[Request, AnyContent] {
 
   override def invokeBlock[A](
     request: Request[A],
@@ -32,4 +32,7 @@ class AdminAction @Inject() (
       .flatMap( _ => OptionT.liftF(block (request)) )
       .getOrElse(Results.Forbidden)
   }
+
+  override def parser: BodyParser[AnyContent] = parser
+  override protected def executionContext: ExecutionContext = ec
 }

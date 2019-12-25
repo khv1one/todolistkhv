@@ -16,7 +16,7 @@ lazy val root = (project in file("."))
       "com.typesafe.play" %% "play-json" % "2.8.1",
       "org.typelevel" %% "cats-core" % "2.1.0",
       "org.typelevel" %% "cats-kernel" % "2.1.0",
-      "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
+      //"org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
       specs2 % Test,
     ),
 

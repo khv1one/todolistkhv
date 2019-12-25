@@ -39,7 +39,6 @@ class UserController @Inject() (
     } else {
       Future(NotFound)
     }
-
   }
 
   def delete(id: Long) = adminAction.async { implicit request =>
