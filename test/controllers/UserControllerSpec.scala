@@ -1,29 +1,16 @@
 package controllers
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import actions.{AdminAction, UserAction}
-import org.checkerframework.checker.units.qual.A
+import actions.{AdminActionMock, UserActionMock}
+import models.User
 import org.specs2.mock.Mockito
-import org.specs2.mutable._
-import org.specs2.runner._
-import org.specs2.specification.BeforeAfterAll
-import play.api.test._
-import play.api.test.Helpers._
-import play.api.Application
+import play.api.{Application, Play}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.Play
-import play.api.libs.concurrent.Futures
-import play.api.mvc.{AnyContentAsEmpty, BodyParsers, MessagesControllerComponents, Request, Result, Results}
+import play.api.mvc.Results
+import play.api.test.Helpers._
+import play.api.test._
 import repos.UserRepo
-import org.mockito.Mockito._
-import org.mockito.internal.matchers.Matches
-import org.specs2.matcher.Matchers
-import org.specs2.mock.Mockito
-import org.specs2.mutable._
-import org.specs2.runner._
 
 class UserControllerSpec (
   implicit ec: ExecutionContext
@@ -35,8 +22,8 @@ class UserControllerSpec (
 
 
   val userRepo = mock[UserRepo]
-  val userAction = mock[UserAction]
-  val adminAction = mock[AdminAction]
+  val userAction = new UserActionMock(false)
+  val adminAction = new AdminActionMock(true, User(0, "admin", "admin"))
   val smcc = stubMessagesControllerComponents()
   val controller = new UserController(userRepo, userAction, adminAction, smcc)
   //val method = controller.me()(FakeRequest())

@@ -11,15 +11,12 @@ import play.api.mvc._
 import repos.UserRepo
 import utils.GlobalKeys
 
-case class UserRequest[A](user: User, request: Request[A])
-  extends WrappedRequest[A](request)
-
 @Singleton
 class UserAction @Inject() (
   parser: BodyParsers.Default,
   userRepo: UserRepo,
   )(implicit ec: ExecutionContext
-  ) extends ActionBuilder[UserRequest, AnyContent] {
+  ) extends UserActionT {
 
   override def invokeBlock[A](
     request: Request[A],

@@ -5,7 +5,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 import cats.instances.future._
-import actions.{AdminAction, UserAction}
+import actions.{AdminActionT, UserActionT}
 import models.User
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, MessagesControllerComponents}
@@ -13,8 +13,8 @@ import repos.UserRepo
 
 class UserController @Inject() (
   userRepo: UserRepo,
-  userAction: UserAction,
-  adminAction: AdminAction,
+  userAction: UserActionT,
+  adminAction: AdminActionT,
   cc: MessagesControllerComponents,
 ) (implicit ec: ExecutionContext
 ) extends AbstractController(cc) {

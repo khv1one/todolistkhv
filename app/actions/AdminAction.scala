@@ -16,11 +16,11 @@ class AdminAction @Inject() (
   parser: BodyParsers.Default,
   userRepo: UserRepo
 )(implicit ec: ExecutionContext,
-) extends ActionBuilder[Request, AnyContent] {
+) extends AdminActionT {
 
   override def invokeBlock[A](
     request: Request[A],
-    block: Request[A] => Future[Result]
+    block: UserRequest[A] => Future[Result]
   ): Future[Result] = {
 
     val admin = request.session.get(GlobalKeys.SESSION_USER_ID_KEY) match {
@@ -29,10 +29,10 @@ class AdminAction @Inject() (
     }
 
     admin
-      .flatMap( _ => OptionT.liftF(block (request)) )
+      .flatMap( admin => OptionT.liftF(block (UserRequest(admin, request))) )
       .getOrElse(Results.Forbidden)
   }
 
-  override def parser: BodyParser[AnyContent] = parser
   override protected def executionContext: ExecutionContext = ec
+  override def parser: BodyParser[AnyContent] = parser
 }

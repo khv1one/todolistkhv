@@ -1,23 +1,21 @@
 package controllers
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Failure
+import scala.concurrent.ExecutionContext
 
-import akka.actor.Status.Success
-import cats.data.{EitherT, Nested, OptionT}
-import com.google.inject.Inject
-import models.{Task, User}
-import play.api.libs.json.Json
-import play.api.mvc.{AbstractController, Action, AnyContent, MessagesControllerComponents, Result}
-import repos.{TaskRepo, UserRepo}
+import cats.data.OptionT
 import cats.instances.future._
-import actions.{AdminAction, UserAction}
+import actions.{AdminActionT, UserActionT}
+import com.google.inject.Inject
+import models.Task
+import play.api.libs.json.Json
+import play.api.mvc.{AbstractController, MessagesControllerComponents}
+import repos.{TaskRepo, UserRepo}
 
 class TaskController @Inject() (
   taskRepo: TaskRepo,
   userRepo: UserRepo,
-  userAction: UserAction,
-  adminAction: AdminAction,
+  userAction: UserActionT,
+  adminAction: AdminActionT,
   cc: MessagesControllerComponents
 ) (implicit ex: ExecutionContext
 ) extends AbstractController (cc) {

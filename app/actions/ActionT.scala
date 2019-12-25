@@ -1,5 +1,5 @@
 package actions
 
-trait ActionT {
+import play.api.mvc.ActionBuilder
 
-}
+trait ActionT[+R[_], B] extends ActionBuilder[R, B]
