@@ -23,7 +23,7 @@ class UserAction @Inject() (
     block: UserRequest[A] => Future[Result]
   ): Future[Result] = {
 
-    val user = request.session.get(GlobalKeys.SESSION_USER_ID_KEY) match {
+    val user = request.session.get(GlobalKeys.SESSION_USER_NAME_KEY) match {
       case Some(value) => userRepo.userByName(value)
       case _ => OptionT[Future, User](Future(None))
     }

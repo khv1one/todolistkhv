@@ -1,5 +1,5 @@
 package utils
 
 object GlobalKeys {
-  val SESSION_USER_ID_KEY = "username"
+  val SESSION_USER_NAME_KEY = "username"
 }

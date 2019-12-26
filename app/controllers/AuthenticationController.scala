@@ -27,7 +27,7 @@ class AuthenticationController @Inject() (
     val logUser = request.body
     userRepo.userByNameAndPassword(logUser.username, logUser.password)
       .map { user =>
-        Ok.withSession(GlobalKeys.SESSION_USER_ID_KEY -> user.username)
+        Ok.withSession(GlobalKeys.SESSION_USER_NAME_KEY -> user.username)
       }.getOrElse(NotFound)
   })
 
