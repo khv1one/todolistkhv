@@ -10,20 +10,20 @@ case class User (
 
 object User extends Format[User] {
 
-  implicit val jsWrite: OWrites[User] = Json.writes[User]
+  implicit val jsWrite: OWrites[User] = writes
   implicit val jsRead: Reads[User] = reads
 
   override def reads(json: JsValue): JsResult[User] =
     for {
-      id <- (json \ "id").validate[String]
-      name <- (json \ "username").validate[String]
-      pass <- (json \ "password").validate[String]
-    } yield if (id.isEmpty) User(0, name, pass) else User(id.toLong, name, pass)
+      id <- json("id").validate[Long]
+      name <- json("username").validate[String]
+      pass <- json("password").validate[String]
+    } yield User(id, name, pass)
 
-  override def writes(o: User): JsValue = JsObject(List(
-    "id" -> JsString(o.id.toString),
-    "username" -> JsString(o.username),
-    "password" -> JsString(o.password)
-  ))
+  override def writes(user: User): JsObject = Json.obj(
+    "id" -> user.id,
+    "username" -> user.username,
+    "password" -> user.password,
+  )
 
 }
