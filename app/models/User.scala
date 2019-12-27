@@ -15,9 +15,9 @@ object User extends Format[User] {
 
   override def reads(json: JsValue): JsResult[User] =
     for {
-      id <- json("id").validate[Long]
-      name <- json("username").validate[String]
-      pass <- json("password").validate[String]
+      id <- (json \ "id").validate[Long]
+      name <- (json \ "username").validate[String]
+      pass <- (json \ "password").validate[String]
     } yield User(id, name, pass)
 
   override def writes(user: User): JsObject = Json.obj(

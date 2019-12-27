@@ -36,7 +36,7 @@ class UserController @Inject() (
   def update = userAction.async(parse.json[User]) { implicit request =>
     if (request.user.id == request.body.id) {
       userRepo.update(request.body)
-        .map( result => if (result != 0) Ok else NotFound )
+        .map( result => if (result != 0) Ok else NotFound ) //вопрос в userRepo.delete
         .recover{ case _ => ServiceUnavailable  }
     } else {
       Future(NotFound)

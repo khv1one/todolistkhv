@@ -17,11 +17,11 @@ object Task extends Format[Task] {
 
   override def reads(json: JsValue): JsResult[Task] =
     for {
-      id <- json("id").validate[String]
-      userId <- json("userId").validate[String]
-      text <- json("text").validate[String]
-      done <- json("done").validate[Boolean]
-      deleted <- json("deleted").validate[Boolean]
+      id <- (json \ "id").validate[String]
+      userId <- (json \ "userId").validate[String]
+      text <- (json \ "text").validate[String]
+      done <- (json \ "done").validate[Boolean]
+      deleted <- (json \ "deleted").validate[Boolean]
     } yield Task(id.toLong, userId.toLong, text, done, deleted)
 
   override def writes(o: Task): JsObject = Json.obj(

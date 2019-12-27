@@ -57,5 +57,6 @@ class UserRepo @Inject() (protected val dbConfigProvider: DatabaseConfigProvider
 
   def delete(id: Long) = db.run {
     usersTable.filter(_.id === id).delete
+    // как делать delete, чтобы при ненахождении id выкидывалось исключение как в методе add
   }
 }

@@ -13,8 +13,8 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Play
-import play.api.libs.json.Json
-import play.api.mvc.{BodyParsers, Results}
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{BodyParsers, Request, Results}
 import play.api.test.Helpers._
 import play.api.test._
 import repos.UserRepo
@@ -39,7 +39,8 @@ class UserControllerSpec extends PlaySpec with Results with GuiceOneAppPerSuite 
   val controller = new UserController(userRepo, userAction, adminAction, smcc)
 
   "users" should {
-    val request = FakeRequest(GET, "/users")
+    val url = controllers.routes.UserController.users().url
+    val request = FakeRequest(GET, url)
 
     "not empty response from repo" in {
       val users = Seq(User(0, "user1", "pass1"), User(1, "admin", "admin"))
@@ -59,7 +60,8 @@ class UserControllerSpec extends PlaySpec with Results with GuiceOneAppPerSuite 
   }
 
   "me" should {
-    val request = FakeRequest(GET, "/users/me")
+    val url = controllers.routes.UserController.me().url
+    val request = FakeRequest(GET, url)
     when( userRepo.userById(anyLong()) ).thenReturn(OptionT(Future(Option(sessionUser))))
     val method = controller.me.apply(request)
 
@@ -81,8 +83,9 @@ class UserControllerSpec extends PlaySpec with Results with GuiceOneAppPerSuite 
 
   "userById(id: Long)" should {
     val requestId = 5
+    val url = controllers.routes.UserController.userById(requestId).url
     val repoResponseUser = User(requestId, "user", "pass")
-    val request = FakeRequest(GET, s"/users/$requestId")
+    val request = FakeRequest(GET, url)
 
     when( userRepo.userById(anyLong()) ).thenReturn(OptionT(Future(Option(repoResponseUser))))
     val method = controller.userById(requestId).apply(request)
@@ -105,8 +108,9 @@ class UserControllerSpec extends PlaySpec with Results with GuiceOneAppPerSuite 
 
   "userByName(name: String)" should {
     val requestName = "Name"
+    val url = controllers.routes.UserController.userByName(requestName).url
     val repoResponseUser = User(0, requestName, "pass")
-    val request = FakeRequest(GET, s"/users/$requestName")
+    val request = FakeRequest(GET, url)
 
     when( userRepo.userByName(anyString()) ).thenReturn(OptionT(Future(Option(repoResponseUser))))
     val method = controller.userByName(requestName).apply(request)
@@ -129,7 +133,8 @@ class UserControllerSpec extends PlaySpec with Results with GuiceOneAppPerSuite 
 
   "delete(id: Long)" should {
     val deleteId = 5
-    val request = FakeRequest(GET, s"/users/$deleteId/delete")
+    val url = controllers.routes.UserController.delete(deleteId).url
+    val request = FakeRequest(GET, url)
 
     "user found" in {
       when( userRepo.delete(anyLong()) ).thenReturn(Future(1))
@@ -151,30 +156,80 @@ class UserControllerSpec extends PlaySpec with Results with GuiceOneAppPerSuite 
   }
 
   "update" should {
-    val request = FakeRequest(GET, s"/users/update")
-      .withHeaders("Content-Type" -> "application/json")
+    val url = controllers.routes.UserController.update().url
+    val request: Request[JsValue] = FakeRequest(PUT, url)
+      .withHeaders(CONTENT_TYPE -> JSON)
       .withBody(Json.toJson(sessionUser))
 
     "user found" in {
       when( userRepo.update(any[User]) ).thenReturn(Future(1))
-      val method = controller.update.apply(request)
+      val method = call(controller.update, request)
       status(method) mustBe OK
     }
 
     "user not found" in {
       when( userRepo.update(any[User]) ).thenReturn(Future(0))
-      val method = controller.update.apply(request)
+      val method = call(controller.update, request)
       status(method) mustBe NOT_FOUND
     }
 
     "user update not his data" in {
       val strangerUser = User(1, "newname", "newpass")
-      val request = FakeRequest(GET, s"/users/update")
-        .withHeaders("Content-Type" -> "application/json")
+      val request = FakeRequest(PUT, url)
+        .withHeaders(CONTENT_TYPE -> JSON)
         .withBody(Json.toJson(strangerUser))
-      val method = controller.update.apply(request)
+      val method = call(controller.update, request)
       status(method) mustBe NOT_FOUND
+    }
+
+    "corrupt json" in {
+      val request = FakeRequest(GET, url)
+        .withHeaders(CONTENT_TYPE -> JSON)
+        .withBody(Json.obj(
+          "id"    -> 5,
+          "usergames" -> "error",
+          "password" -> "qwerty"
+        ))
+
+      val method = call(controller.update, request)
+      status(method) mustBe BAD_REQUEST
     }
   }
 
+  "addUser" should {
+    val url = controllers.routes.UserController.addUser().url
+    val nUser = User(777, "newUser", "newPass")
+    val request: Request[JsValue] = FakeRequest(POST, url)
+      .withHeaders(CONTENT_TYPE -> JSON)
+      .withBody(Json.toJson(nUser))
+
+    "add" in {
+      when( userRepo.add(any[User]) ).thenReturn(Future(1))
+      val method = call(controller.addUser, request)
+      status(method) mustBe CREATED
+    }
+
+    "read data from request" in {
+      verify(userRepo).add(nUser)
+    }
+
+    "not add" in {
+      when( userRepo.add(any[User]) ).thenReturn(Future(0)) // что нужно возвращать, чтобы отрабатывал case recover в контроллере
+      val method = call(controller.addUser, request)
+      status(method) mustBe BAD_REQUEST
+    }
+
+    "corrupt json" in {
+      val request = FakeRequest(POST, url)
+        .withHeaders(CONTENT_TYPE -> JSON)
+        .withBody(Json.obj(
+          "id"    -> 5,
+          "usergames" -> "error",
+          "password" -> "qwerty"
+        ))
+
+      val method = call(controller.addUser, request)
+      status(method) mustBe BAD_REQUEST
+    }
+  }
 }
