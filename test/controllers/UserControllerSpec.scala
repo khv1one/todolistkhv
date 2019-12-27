@@ -19,7 +19,8 @@ import play.api.test.Helpers._
 import play.api.test._
 import repos.UserRepo
 
-class UserControllerSpec extends PlaySpec with Results with GuiceOneAppPerSuite with MockitoSugar with MustMatchers{
+class UserControllerSpec
+  extends PlaySpec with Results with GuiceOneAppPerSuite with MockitoSugar with MustMatchers {
 
   implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
   implicit val mat: ActorSystem = ActorSystem()
@@ -57,6 +58,7 @@ class UserControllerSpec extends PlaySpec with Results with GuiceOneAppPerSuite 
       status(method) mustBe OK
       contentAsJson(method) mustBe Json.toJson(Seq[User]())
     }
+
   }
 
   "me" should {

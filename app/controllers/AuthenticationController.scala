@@ -5,7 +5,7 @@ import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
 
 import cats.instances.future._
-import actions.UserAction
+import actions.{UserAction, UserActionT}
 import com.google.inject.Inject
 import models.User
 import play.api.mvc.{AbstractController, MessagesControllerComponents}
@@ -16,7 +16,7 @@ import utils.GlobalKeys
 @Singleton
 class AuthenticationController @Inject() (
   userRepo: UserRepo,
-  userAction: UserAction,
+  userAction: UserActionT,
   addToken: CSRFAddToken,
   cc: MessagesControllerComponents,
   )(implicit ec: ExecutionContext
