@@ -2,10 +2,8 @@ package controllers
 
 import javax.inject.Inject
 
-import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
-import scala.concurrent._
+
 import cats.instances.future._
 import actions.{AdminActionT, UserActionT}
 import models.User

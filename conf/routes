@@ -12,7 +12,7 @@ GET     /users/:id                     controllers.UserController.userById(id: L
 GET     /users/name/:name              controllers.UserController.userByName(name: String)
 PUT     /users/update                  controllers.UserController.update
 DELETE  /users/:id/delete              controllers.UserController.delete(id: Long)
-POST    /users/login                   controllers.AuthenticationController.login
+POST    /users/login                   controllers.AuthenticationController.login(log: String, pass: String)
 POST    /users/logout                  controllers.AuthenticationController.logout
 
 GET     /tasks                         controllers.TaskController.tasks

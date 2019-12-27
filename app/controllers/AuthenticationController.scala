@@ -4,15 +4,14 @@ import javax.inject.Singleton
 
 import scala.concurrent.{ExecutionContext, Future}
 
-import com.google.inject.Inject
-import models.User
-import play.api.libs.json.Json
-import play.api.mvc.{AbstractController, Cookie, DiscardingCookie, MessagesControllerComponents}
-import repos.UserRepo
-import utils.GlobalKeys
 import cats.instances.future._
 import actions.UserAction
-import play.filters.csrf.{CSRF, CSRFAddToken}
+import com.google.inject.Inject
+import models.User
+import play.api.mvc.{AbstractController, MessagesControllerComponents}
+import play.filters.csrf.CSRFAddToken
+import repos.UserRepo
+import utils.GlobalKeys
 
 @Singleton
 class AuthenticationController @Inject() (
@@ -23,9 +22,8 @@ class AuthenticationController @Inject() (
   )(implicit ec: ExecutionContext
   ) extends AbstractController(cc) {
 
-  def login = addToken( Action.async(parse.json[User]) {  implicit request =>
-    val logUser = request.body
-    userRepo.userByNameAndPassword(logUser.username, logUser.password)
+  def login(log: String, pass: String) = addToken( Action.async {  implicit request =>
+    userRepo.userByNameAndPassword(log, pass)
       .map { user =>
         Ok.withSession(GlobalKeys.SESSION_USER_NAME_KEY -> user.username)
       }.getOrElse(NotFound)
