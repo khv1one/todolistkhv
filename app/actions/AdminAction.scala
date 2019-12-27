@@ -24,7 +24,7 @@ class AdminAction @Inject() (
   ): Future[Result] = {
 
     val admin = request.session.get(GlobalKeys.SESSION_USER_NAME_KEY) match {
-      case Some(_) => userRepo.userByName("admin") //заглушка вместо таблицы ролей
+      case Some(name) if name.equals("admin") => userRepo.userByName(name) //заглушка вместо таблицы ролей
       case _ => OptionT[Future, User](Future(None))
     }
 
