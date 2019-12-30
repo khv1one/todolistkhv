@@ -4,9 +4,10 @@ import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-import cats.data.OptionT
+import cats.data.{EitherT, OptionT}
 import cats.instances.future._
 import models.User
+import org.checkerframework.checker.units.qual.A
 import play.api.mvc._
 import repos.UserRepo
 import utils.GlobalKeys
@@ -19,20 +20,17 @@ class UserAction @Inject() (
   implicit ec: ExecutionContext
 ) extends UserActionT {
 
-  override def invokeBlock[A](
-    request: Request[A],
-    block: UserRequest[A] => Future[Result]
-  ): Future[Result] = {
-
+  override protected def refine[A](request: Request[A]): Future[Either[Result, UserRequest[A]]] = {
     val user = request.session.get(GlobalKeys.SESSION_USER_NAME_KEY) match {
       case Some(value) => OptionT[Future, User](userRepo.userByName(value))
       case _ => OptionT[Future, User](Future(None))
     }
 
-    user
-      .flatMap( usr => OptionT.liftF( block (UserRequest(usr, request) )))
-      .getOrElse(Results.Unauthorized)
+    val userRequest = user.flatMap { user =>
+      OptionT.liftF(Future(UserRequest(user, request)))
+    }
 
+    EitherT.fromOptionF(userRequest.value, Results.Unauthorized).value
   }
 
   override def parser: BodyParser[AnyContent] = parser
