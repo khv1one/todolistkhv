@@ -18,7 +18,7 @@ class TaskController @Inject() (
   adminAction: AdminActionT,
   cc: ControllerComponents
 )(
-  implicit ex: ExecutionContext 
+  implicit ex: ExecutionContext
 ) extends AbstractController (cc) {
 
   def addTask(): Action[Task] = userAction.async(parse.json[Task]) { implicit request =>
