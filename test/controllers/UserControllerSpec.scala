@@ -151,11 +151,11 @@ class UserControllerSpec
     }
 
 //    "db not response" in {
-//      when( userRepo.delete(anyLong()) ).thenReturn(Future.never)
+//      when( userRepo.delete(anyLong()) ).thenReturn(Future.failed())
 //      val method = controller.delete(deleteId).apply(request)
 //      status(method) mustBe SERVICE_UNAVAILABLE
 //    }
-  }
+//  }
 
   "update" should {
     val url = controllers.routes.UserController.update().url

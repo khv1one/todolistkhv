@@ -1,6 +1,5 @@
 package models
-
-import play.api.libs.json.{Format, JsObject, JsResult, JsString, JsValue, Json, OFormat, OWrites, Reads}
+import play.api.libs.json._
 
 case class Task (
   id: Long,
@@ -10,26 +9,20 @@ case class Task (
   deleted: Boolean
 )
 
-object Task extends Format[Task] {
+object Task {
+  implicit val reads: Reads[Task] = for {
+      id <- (__ \ "id").readWithDefault[Long](0L)
+      userId <- (__ \ "userId").read[Long]
+      text <- (__ \ "text").read[String]
+      done <- (__ \ "done").readWithDefault[Boolean](false)
+      deleted <- (__ \ "deleted").readWithDefault[Boolean](false)
+    } yield Task(id, userId, text, done, deleted)
 
-  implicit val jsWrite: OWrites[Task] = writes
-  implicit val jsRead: Reads[Task] = reads
-
-  override def reads(json: JsValue): JsResult[Task] =
-    for {
-      id <- (json \ "id").validate[String]
-      userId <- (json \ "userId").validate[String]
-      text <- (json \ "text").validate[String]
-      done <- (json \ "done").validate[Boolean]
-      deleted <- (json \ "deleted").validate[Boolean]
-    } yield Task(id.toLong, userId.toLong, text, done, deleted)
-
-  override def writes(o: Task): JsObject = Json.obj(
-    "id" -> JsString(o.id.toString),
-    "userId" -> JsString(o.userId.toString),
-    "text" -> JsString(o.text),
-    "done" -> JsString(o.done.toString),
-    "deleted" -> JsString(o.deleted.toString),
+  implicit val writes: Writes[Task] = task => Json.obj(
+    "id" -> task.id,
+    "userId" -> task.userId,
+    "text" -> task.text,
+    "done" -> task.done,
+    "deleted" -> task.deleted,
   )
-
 }

@@ -1,4 +1,4 @@
-package controllers.hendlers
+package controllers.handlers
 
 import scala.concurrent.Future
 

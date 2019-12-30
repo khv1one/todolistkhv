@@ -1,6 +1,6 @@
 package models
 
-import play.api.libs.json.{Format, JsObject, JsResult, JsString, JsValue, Json, OFormat, OWrites, Reads}
+import play.api.libs.json._
 
 case class User (
   id: Long,
@@ -8,22 +8,16 @@ case class User (
   password: String
 )
 
-object User extends Format[User] {
-
-  implicit val jsWrite: OWrites[User] = writes
-  implicit val jsRead: Reads[User] = reads
-
-  override def reads(json: JsValue): JsResult[User] =
-    for {
-      id <- (json \ "id").validate[Long]
-      name <- (json \ "username").validate[String]
-      pass <- (json \ "password").validate[String]
+object User  {
+  implicit val reads: Reads[User] = for {
+      id <- (__ \ "id").readWithDefault[Long](0L)
+      name <- (__ \ "username").read[String]
+      pass <- (__ \ "password").read[String]
     } yield User(id, name, pass)
 
-  override def writes(user: User): JsObject = Json.obj(
+  implicit val writes: Writes[User] = user => Json.obj(
     "id" -> user.id,
     "username" -> user.username,
     "password" -> user.password,
   )
-
 }

@@ -7,6 +7,6 @@ import play.api.inject.{Binding, Module}
 class ActionModules extends Module {
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
     bind[AdminActionT].to[AdminAction],
-    bind[UserActionT].to[UserAction],
+    bind[UserActionT].to[UserAction]
   )
 }

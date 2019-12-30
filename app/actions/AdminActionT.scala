@@ -1,5 +1,5 @@
 package actions
 
-import play.api.mvc.AnyContent
+import play.api.mvc.{ActionBuilder, AnyContent}
 
-trait AdminActionT extends ActionT[UserRequest, AnyContent]
+trait AdminActionT extends ActionBuilder[UserRequest, AnyContent]

@@ -15,7 +15,8 @@ import utils.GlobalKeys
 class AdminAction @Inject() (
   parser: BodyParsers.Default,
   userRepo: UserRepo
-)(implicit ec: ExecutionContext,
+)(
+  implicit ec: ExecutionContext,
 ) extends AdminActionT {
 
   override def invokeBlock[A](
@@ -24,7 +25,7 @@ class AdminAction @Inject() (
   ): Future[Result] = {
 
     val admin = request.session.get(GlobalKeys.SESSION_USER_NAME_KEY) match {
-      case Some(name) if name.equals("admin") => userRepo.userByName(name) //заглушка вместо таблицы ролей
+      case Some(name) if name.equals("admin") => OptionT[Future, User](userRepo.userByName(name)) //заглушка вместо таблицы ролей
       case _ => OptionT[Future, User](Future(None))
     }
 

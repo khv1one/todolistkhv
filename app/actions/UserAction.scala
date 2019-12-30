@@ -15,8 +15,9 @@ import utils.GlobalKeys
 class UserAction @Inject() (
   parser: BodyParsers.Default,
   userRepo: UserRepo,
-  )(implicit ec: ExecutionContext
-  ) extends UserActionT {
+)(
+  implicit ec: ExecutionContext
+) extends UserActionT {
 
   override def invokeBlock[A](
     request: Request[A],
@@ -24,7 +25,7 @@ class UserAction @Inject() (
   ): Future[Result] = {
 
     val user = request.session.get(GlobalKeys.SESSION_USER_NAME_KEY) match {
-      case Some(value) => userRepo.userByName(value)
+      case Some(value) => OptionT[Future, User](userRepo.userByName(value))
       case _ => OptionT[Future, User](Future(None))
     }
 
