@@ -1,65 +1,87 @@
 package controllers
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Failure
+import scala.concurrent.ExecutionContext
 
-import akka.actor.Status.Success
-import cats.data.{EitherT, Nested, OptionT}
-import com.google.inject.Inject
-import models.{Task, User}
-import play.api.libs.json.Json
-import play.api.mvc.{AbstractController, Action, AnyContent, MessagesControllerComponents, Result}
-import repos.{TaskRepo, UserRepo}
+import cats.data.OptionT
 import cats.instances.future._
-import actions.SecuredAction
+import actions.{AdminActionT, UserActionT}
+import com.google.inject.Inject
+import models.Task
+import play.api.libs.json.Json
+import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
+import repos.{TaskRepo, UserRepo}
 
 class TaskController @Inject() (
   taskRepo: TaskRepo,
   userRepo: UserRepo,
-  securedAction: SecuredAction,
-  cc: MessagesControllerComponents
-) (implicit ex: ExecutionContext
+  userAction: UserActionT,
+  adminAction: AdminActionT,
+  cc: ControllerComponents
+)(
+  implicit ex: ExecutionContext
 ) extends AbstractController (cc) {
 
-  def addTask = securedAction.async(parse.json[Task]) { implicit request =>
+  def addTask(): Action[Task] = userAction.async(parse.json[Task]) { implicit request =>
     taskRepo.add(request.body)
-      .map ( _ => Created )
+      .map( _ => Created)
       .recover { case _ => BadRequest }
   }
 
-  def tasks = securedAction.async { implicit request =>
-    taskRepo.tasks.map( tasks => Ok(Json.toJson(tasks)) )
+  def tasks: Action[AnyContent] = userAction.async { implicit request =>
+    taskRepo.tasksByUserId(request.user.id).map{ tasks => Ok(Json.toJson(tasks)) }
   }
 
-  def taskById(id: Long) = securedAction.async { implicit request =>
-    taskRepo.taskById(id)
-      .map( task => Ok(Json.toJson(task)) )
-      .getOrElse(NotFound)
+  def update: Action[Task] = userAction.async(parse.json[Task]) { implicit request =>
+
+    val task = for {
+      tasks <- OptionT.liftF(taskRepo.tasksByUserId(request.user.id))
+      task <- OptionT(taskRepo.taskById(request.body.id)) if tasks.contains(task)
+    } yield task
+
+    task.flatMap { _ =>
+      OptionT.liftF(taskRepo.update(request.body)
+        .map( result => if (result != 0) Ok else NotFound)
+        .recover{ case _ => ServiceUnavailable})
+    }.getOrElse(NotFound)
+
   }
 
-  def tasksByUserId(id: Long) = securedAction.async { implicit request =>
-    taskRepo.tasksByUserId(id).map( tasks => Ok(Json.toJson(tasks)) )
+  def delete(id: Long): Action[AnyContent] = userAction.async { implicit request =>
+
+    val task = for {
+      tasks <- OptionT.liftF(taskRepo.tasksByUserId(request.user.id))
+      task <- OptionT(taskRepo.taskById(id)) if tasks.contains(task)
+    } yield task
+
+    task.flatMap { task =>
+      OptionT.liftF(taskRepo.delete(task.id)
+        .map( result => if (result != 0) Ok else NotFound)
+        .recover{ case _ => ServiceUnavailable})
+    }.getOrElse(NotFound)
+
   }
 
-  def tasksByUserName(name: String) = securedAction.async { implicit request =>
+  def allTasks: Action[AnyContent] = adminAction.async { implicit request =>
+    taskRepo.tasks.map{ tasks => Ok(Json.toJson(tasks)) }
+  }
+
+  def tasksByUserId(id: Long): Action[AnyContent] = adminAction.async { implicit request =>
+    taskRepo.tasksByUserId(id).map{ tasks => Ok(Json.toJson(tasks)) }
+  }
+
+  def tasksByUserName(name: String): Action[AnyContent] = adminAction.async { implicit request =>
     val tasks = for {
-      user <- userRepo.userByName(name)
+      user <- OptionT(userRepo.userByName(name))
       tasks <- OptionT.liftF(taskRepo.tasksByUserId(user.id))
     } yield Ok(Json.toJson(tasks))
 
     tasks.getOrElse(NotFound)
   }
 
-  def update = securedAction.async(parse.json[Task]) { implicit request =>
-    taskRepo.update(request.body)
-      .map( result => if (result != 0) Ok else NotFound )
-      .recover{ case _ => ServiceUnavailable  }
-  }
-
-  def delete(id: Long) = securedAction.async { implicit request =>
-    taskRepo.delete(id)
-      .map( result => if (result != 0) Ok else NotFound)
-      .recover{ case _ => ServiceUnavailable}
+  def taskById(id: Long): Action[AnyContent] = adminAction.async { implicit request =>
+    OptionT(taskRepo.taskById(id))
+      .map{ task => Ok(Json.toJson(task)) }
+      .getOrElse(NotFound)
   }
 
 }

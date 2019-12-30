@@ -1,27 +1,18 @@
-# Routes
-# This file defines all application routes (Higher priority routes first)
-# https://www.playframework.com/documentation/latest/ScalaRouting
-# ~~~~
+GET     /users                         controllers.UserController.users
+GET     /users/me                      controllers.UserController.me
+POST    /users/add                     controllers.UserController.addUser
+GET     /users/:id                     controllers.UserController.userById(id: Long)
+GET     /users/name/:name              controllers.UserController.userByName(name: String)
+PUT     /users/update                  controllers.UserController.update
+DELETE  /users/:id/delete              controllers.UserController.delete(id: Long)
+POST    /users/login                   controllers.AuthenticationController.login(log: String, pass: String)
+POST    /users/logout                  controllers.AuthenticationController.logout
 
-# An example controller showing a sample home page
-
-GET     /todolist/api/users                         controllers.UserController.users
-POST    /todolist/api/users/add                     controllers.UserController.addUser
-GET     /todolist/api/users/:id                     controllers.UserController.userById(id: Long)
-GET     /todolist/api/users/name/:name              controllers.UserController.userByName(name: String)
-PUT     /todolist/api/users/update                  controllers.UserController.update
-DELETE  /todolist/api/users/:id/delete              controllers.UserController.delete(id: Long)
-POST    /todolist/api/users/login                   controllers.AuthenticationController.login
-POST    /todolist/api/users/logout                  controllers.AuthenticationController.logout
-
-GET     /todolist/api/tasks                         controllers.TaskController.tasks
-POST    /todolist/api/tasks/add                     controllers.TaskController.addTask
-GET     /todolist/api/tasks/:id                     controllers.TaskController.taskById(id: Long)
-GET     /todolist/api/tasks/user/:id                controllers.TaskController.tasksByUserId(id: Long)
-GET     /todolist/api/tasks/user/name/:name         controllers.TaskController.tasksByUserName(name: String)
-PUT     /todolist/api/tasks/update                  controllers.TaskController.update
-DELETE  /todolist/api/tasks/:id/delete              controllers.TaskController.delete(id: Long)
-
-
-# Map static resources from the /public folder to the /assets URL path
-#GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /tasks                         controllers.TaskController.tasks
+GET     /tasks/all                     controllers.TaskController.allTasks
+POST    /tasks/add                     controllers.TaskController.addTask
+GET     /tasks/:id                     controllers.TaskController.taskById(id: Long)
+GET     /tasks/user/:id                controllers.TaskController.tasksByUserId(id: Long)
+GET     /tasks/user/name/:name         controllers.TaskController.tasksByUserName(name: String)
+PUT     /tasks/update                  controllers.TaskController.update
+DELETE  /tasks/:id/delete              controllers.TaskController.delete(id: Long)

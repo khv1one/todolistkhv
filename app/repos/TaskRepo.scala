@@ -4,9 +4,8 @@ import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-import cats.data.OptionT
-import models.{Task, User}
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import models.Task
+import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 
 @Singleton
@@ -26,23 +25,23 @@ class TaskRepo @Inject() (protected val dbConfigProvider: DatabaseConfigProvider
 
   private lazy val tasksTable = TableQuery[TaskTable]
 
-  def add(task: Task) = db.run (tasksTable += task)
+  def add(task: Task): Future[Int] = db.run (tasksTable += task)
 
   def tasks: Future[Seq[Task]] = db.run (tasksTable.result)
 
-  def taskById(id: Long): OptionT[Future, Task] = OptionT(db.run {
+  def taskById(id: Long): Future[Option[Task]] = db.run {
     tasksTable.filter(_.id === id).result.headOption
-  })
+  }
 
   def tasksByUserId(userId: Long): Future[Seq[Task]] = db.run {
     tasksTable.filter(_.userId === userId).result
   }
 
-  def update(task: Task) = db.run {
+  def update(task: Task): Future[Int] = db.run {
     tasksTable.filter(_.id === task.id).update(task)
   }
 
-  def delete(id: Long) = db.run {
+  def delete(id: Long): Future[Int] = db.run {
     tasksTable.filter(_.id === id).delete
   }
 

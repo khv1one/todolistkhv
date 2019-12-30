@@ -17,7 +17,8 @@ lazy val root = (project in file("."))
       "org.typelevel" %% "cats-core" % "2.1.0",
       "org.typelevel" %% "cats-kernel" % "2.1.0",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
-      specs2 % Test,
+      "org.mockito" %% "mockito-scala" % "1.10.2",
+      //specs2 % Test,
     ),
 
     scalacOptions ++= Seq(
