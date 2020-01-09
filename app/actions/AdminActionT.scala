@@ -1,6 +1,5 @@
 package actions
 
-import play.api.mvc.{ActionBuilder, ActionRefiner, AnyContent, Request}
+import play.api.mvc._
 
-trait AdminActionT extends ActionBuilder[UserRequest, AnyContent]
-  with ActionRefiner[Request, UserRequest]
+trait AdminActionT extends ActionFilter[AuthenticatedRequest]
