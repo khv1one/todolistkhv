@@ -6,7 +6,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import cats.data.OptionT
 import cats.instances.future._
-import actions.UserActionT
+import actions.AuthenticatedActionT
 import com.google.inject.Inject
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import play.filters.csrf.CSRFAddToken
@@ -16,7 +16,7 @@ import utils.GlobalKeys
 @Singleton
 class AuthenticationController @Inject() (
   userRepo: UserRepo,
-  userAction: UserActionT,
+  userAction: AuthenticatedActionT,
   addToken: CSRFAddToken,
   cc: ControllerComponents,
 )(

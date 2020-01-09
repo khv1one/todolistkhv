@@ -3,8 +3,7 @@ package controllers
 import scala.concurrent.{ExecutionContext, Future}
 
 import akka.actor.ActorSystem
-import cats.data.OptionT
-import actions.{AdminActionMock, UserActionMock}
+import actions.{AdminActionMock, AuthenticatedActionMock}
 import models.User
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -24,7 +23,7 @@ class UserControllerSpec
 
   implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
   implicit val mat: ActorSystem = ActorSystem()
-  val bp = new BodyParsers.Default
+  implicit val bp = new BodyParsers.Default
 
   val smcc = stubMessagesControllerComponents()
 
@@ -34,8 +33,8 @@ class UserControllerSpec
   val userRepo: UserRepo = mock[UserRepo]
   val sessionUser: User = User(777, "me", "pass")
   val sessionAdmin: User = User(0, "admin", "admin")
-  val userAction = new UserActionMock(Option(sessionUser))
-  val adminAction = new AdminActionMock(Option(sessionAdmin))
+  val userAction = new AuthenticatedActionMock(sessionUser)
+  val adminAction = new AdminActionMock(sessionAdmin)
 
   val controller = new UserController(userRepo, userAction, adminAction, smcc)
 
@@ -64,7 +63,7 @@ class UserControllerSpec
   "me" should {
     val url = controllers.routes.UserController.me().url
     val request = FakeRequest(GET, url)
-    when( userRepo.userById(anyLong()) ).thenReturn(OptionT(Future(Option(sessionUser))))
+    when( userRepo.userById(anyLong()) ).thenReturn(Future(Option(sessionUser)))
     val method = controller.me.apply(request)
 
     "read data from request" in {
@@ -77,7 +76,7 @@ class UserControllerSpec
     }
 
     "user not found in repo" in {
-      when( userRepo.userById(anyLong()) ).thenReturn(OptionT(Future(Option.empty)))
+      when( userRepo.userById(anyLong()) ).thenReturn(Future(Option.empty))
       val method = controller.me.apply(request)
       status(method) mustBe NOT_FOUND
     }
@@ -89,7 +88,7 @@ class UserControllerSpec
     val repoResponseUser = User(requestId, "user", "pass")
     val request = FakeRequest(GET, url)
 
-    when( userRepo.userById(anyLong()) ).thenReturn(OptionT(Future(Option(repoResponseUser))))
+    when( userRepo.userById(anyLong()) ).thenReturn(Future(Option(repoResponseUser)))
     val method = controller.userById(requestId).apply(request)
 
     "read data from request" in {
@@ -102,7 +101,7 @@ class UserControllerSpec
     }
 
     "user not found in repo" in {
-      when( userRepo.userById(anyLong()) ).thenReturn(OptionT(Future(Option.empty)))
+      when( userRepo.userById(anyLong()) ).thenReturn(Future(Option.empty))
       val method = controller.me.apply(request)
       status(method) mustBe NOT_FOUND
     }
@@ -114,7 +113,7 @@ class UserControllerSpec
     val repoResponseUser = User(0, requestName, "pass")
     val request = FakeRequest(GET, url)
 
-    when( userRepo.userByName(anyString()) ).thenReturn(OptionT(Future(Option(repoResponseUser))))
+    when( userRepo.userByName(anyString()) ).thenReturn(Future(Option(repoResponseUser)))
     val method = controller.userByName(requestName).apply(request)
 
     "read data from request" in {
@@ -127,7 +126,7 @@ class UserControllerSpec
     }
 
     "user not found in repo" in {
-      when( userRepo.userByName(anyString()) ).thenReturn(OptionT(Future(Option.empty)))
+      when( userRepo.userByName(anyString()) ).thenReturn(Future(Option.empty))
       val method = controller.me.apply(request)
       status(method) mustBe NOT_FOUND
     }
@@ -155,7 +154,7 @@ class UserControllerSpec
 //      val method = controller.delete(deleteId).apply(request)
 //      status(method) mustBe SERVICE_UNAVAILABLE
 //    }
-//  }
+  }
 
   "update" should {
     val url = controllers.routes.UserController.update().url

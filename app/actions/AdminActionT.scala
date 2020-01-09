@@ -1,6 +1,11 @@
 package actions
 
-import play.api.mvc.{ActionBuilder, ActionRefiner, AnyContent, Request}
+import scala.concurrent.ExecutionContext
 
-trait AdminActionT extends ActionBuilder[UserRequest, AnyContent]
-  with ActionRefiner[Request, UserRequest]
+import play.api.mvc._
+
+trait AdminActionT extends ActionFilter[AuthenticatedRequest] {
+  protected[this] val ec: ExecutionContext
+  override protected def executionContext: ExecutionContext = ec
+}
+

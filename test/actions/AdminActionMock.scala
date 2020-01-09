@@ -2,28 +2,17 @@ package actions
 
 import scala.concurrent.{ExecutionContext, Future}
 
-import akka.actor.ActorSystem
 import models.User
 import play.api.mvc._
 
-class AdminActionMock(user: Option[User] = Option.empty) (
-  implicit ec: ExecutionContext
+class AdminActionMock(user: User) (
+  implicit
+  val ec: ExecutionContext,
+  val bp: BodyParsers.Default
 ) extends AdminActionT {
 
-  override def invokeBlock[A](
-    request: Request[A],
-    block: UserRequest[A] => Future[Result]
-  ): Future[Result] = {
-    if (user.nonEmpty) {
-      block(UserRequest(user.get, request))
-    } else {
-      Future.successful(Results.Forbidden)
-    }
+  override def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
+    Future(None)
   }
 
-  private implicit val mat: ActorSystem = ActorSystem()
-  private val bp = new BodyParsers.Default
-
-  override def parser: BodyParser[AnyContent] = bp
-  override protected def executionContext: ExecutionContext = ec
 }
