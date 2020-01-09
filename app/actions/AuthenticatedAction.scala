@@ -4,9 +4,8 @@ import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-import cats.data.{EitherT, OptionT}
+import cats.data.EitherT
 import cats.instances.future._
-import models.User
 import play.api.mvc._
 import repos.UserRepo
 import utils.GlobalKeys
@@ -16,21 +15,19 @@ class AuthenticatedAction @Inject() (
   userRepo: UserRepo,
 )(
   implicit
-  val ec: ExecutionContext,
-  val bp: BodyParsers.Default
+  val executionContext: ExecutionContext,
+  val parser: BodyParsers.Default
 ) extends AuthenticatedActionT {
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
-    val user = request.session.get(GlobalKeys.SESSION_USER_NAME_KEY) match {
-      case Some(value) => OptionT[Future, User](userRepo.userByName(value))
-      case _ => OptionT[Future, User](Future(None))
-    }
-
-    val userRequest = user.flatMap { user =>
-      OptionT.liftF(Future(AuthenticatedRequest(user, request)))
-    }
-
-    EitherT.fromOptionF(userRequest.value, Results.Unauthorized).value
+    (for {
+      userName <- EitherT.fromOption[Future](request.session.get(GlobalKeys.SESSION_USER_NAME_KEY), "Bad key")
+      user <- EitherT.fromOptionF(userRepo.userByName(userName), "Not found")
+    } yield new AuthenticatedRequest(user, request))
+      .leftMap { ex =>
+        println(ex)
+        Results.Unauthorized
+      }
+      .value
   }
-
 }

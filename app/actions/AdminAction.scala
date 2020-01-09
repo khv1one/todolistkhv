@@ -7,9 +7,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.mvc._
 
 @Singleton
-class AdminAction @Inject() (
-  implicit val ec: ExecutionContext,
-) extends AdminActionT {
+class AdminAction @Inject() (implicit val executionContext: ExecutionContext) extends AdminActionT {
 
   override def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
     val result = request.user match {
@@ -17,5 +15,7 @@ class AdminAction @Inject() (
       case _ => Some(Results.Forbidden)
     }
     Future.successful(result)
+
+
   }
 }
